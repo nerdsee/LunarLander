@@ -2,11 +2,19 @@ import numpy as np
 
 class Sarsa:
 
-    alpha = 0.2
-    gamma = 0.7
-    epsilon = 0.7
-    eps_min = 0.1
-    eps_f = 0.99
+    # Lunar
+    alpha = 0.1 # 0.1
+    gamma = 0.9 # 0.7
+    epsilon = 0.2 # 0.7
+    eps_min = 0.005
+    eps_f = 0.999
+
+    # Lake
+    # alpha = 0.85 # 0.1
+    # gamma = 0.9 # 0.7
+    # epsilon = 0.8 # 0.7
+    # eps_min = 0.005
+    # eps_f = 1
 
     def adjust_epsilon(self):
         if self.epsilon > self.eps_min:
@@ -25,18 +33,32 @@ class Sarsa:
 
     def get_action(self, state):
         # state = self.get_state(real_state)
-        if np.random.uniform(0, 1) < self.epsilon:
-            action = np.random.randint(0, 4)
+        ru = np.random.uniform(0, 1)
+
+        if ru < self.epsilon:
+            action = np.random.randint(4)
         else:
-            if state in self.policy:
-                action = self.policy[state]
-            else:
-                action = np.random.randint(0, 4)
+            action = self.get_action_from_Q(state)
 
         return action
 
-    def get_action_from_policy(self, state):
-        action = self.policy[state]
+    def get_action_e(self, state, epsd):
+        # state = self.get_state(real_state)
+        ru = np.random.uniform(0, 1)
+
+        if ru < epsd:
+            action = np.random.randint(4)
+        else:
+            action = self.get_action_from_Q(state)
+
+        return action
+
+    def get_action_from_Q(self, state):
+        action = 0
+        options = [-1000,-1000,-1000,-1000] # np.zeros(4)
+        for a in range(4):
+            options[a] = self.get_q(state, a)
+        action = np.argmax(options)
         return action
 
     # zwingend neu schreiben
@@ -70,9 +92,9 @@ class Sarsa:
             a = np.argmax(v)
             self.policy[state] = a
 
-    def adjust_q(self, state, action, new_state, reward):
+    def adjust_q(self, state, action, reward, new_state, new_action):
 
-        new_action = self.get_action(new_state)
-
-        self.Q[(state, action)] = self.get_q(state, action) + self.alpha * (
-                reward + self.gamma * self.get_q(new_state, new_action) - self.get_q(state, action))
+        qsa = self.get_q(state, action)
+        qsa_n = self.get_q(new_state, new_action)
+        new_q = qsa + self.alpha * (reward + self.gamma * qsa_n - qsa)
+        self.Q[(state, action)] = new_q
