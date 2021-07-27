@@ -24,7 +24,7 @@ class DQN:
 
         self.state_space = 8
         self.action_space = 4
-        self.batch_size = 50
+        self.batch_size = 100
 
         self.main_network = self.build_network()
         self.target_network = self.build_network()
@@ -37,6 +37,10 @@ class DQN:
     def get_action(self, state):
         if random.uniform(0,1) < self.epsilon:
             return np.random.randint(self.action_space)
+
+        return self.get_action_from_model(state)
+
+    def get_action_from_model(self, state):
         state = np.reshape(state, (1, 8))
         qvalues = self.main_network.predict(state)
         return np.argmax(qvalues[0])
@@ -132,7 +136,7 @@ def train(env, num_epsiodes, do_render = False):
             state = new_state
             a = lunar_dqn.get_action(new_state)
             s_end = datetime.datetime.now()
-            print("Step ",steps ,"# took time:", s_end - s_start)
+            print("Step",episode, "/", steps ,"# took time:", s_end - s_start)
 
         e_end = datetime.datetime.now()
 
@@ -155,11 +159,11 @@ def fly(env, lunar_dqn, num_epsiodes, record):
 
     for episode in range(num_epsiodes):
         state = env.reset()
-        a = lunar_dqn.get_action(state)
+        a = lunar_dqn.get_action_from_model(state)
         unknown = 0
         total_reward = 0
 
-        for steps in range(50000):
+        for steps in range(500):
 
             new_state, reward, done, info = env.step(a)
 
@@ -172,7 +176,7 @@ def fly(env, lunar_dqn, num_epsiodes, record):
                 break
 
             state = new_state
-            a = lunar_dqn.get_action(state)
+            a = lunar_dqn.get_action_from_model(state)
 
         total_reward_list[episode % num_epsiodes] = total_reward
     print("Landings: ", success, "/", num_epsiodes)
