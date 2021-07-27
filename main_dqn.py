@@ -43,8 +43,8 @@ class DQN:
 
     def build_network(self):
         model = Sequential()
-        model.add(Dense(64, input_dim=8, activation='relu'))
-        model.add(Dense(64, activation='relu'))
+        model.add(Dense(12, input_dim=8, activation='relu'))
+        model.add(Dense(10, activation='relu'))
         model.add(Dense(self.action_space, activation='linear'))
         model.compile(loss='mse', optimizer=Adam())
         return model
@@ -102,6 +102,7 @@ def train(env, num_epsiodes, do_render = False):
         step_count = 0
 
         for steps in range(2000):
+            s_start = datetime.datetime.now()
 
             new_state, reward, done, info = env.step(a)
             lunar_dqn.add_sars(state, a, reward, new_state, done)
@@ -130,6 +131,8 @@ def train(env, num_epsiodes, do_render = False):
 
             state = new_state
             a = lunar_dqn.get_action(new_state)
+            s_end = datetime.datetime.now()
+            print("Step ",steps ,"# took time:", s_end - s_start)
 
         e_end = datetime.datetime.now()
 
