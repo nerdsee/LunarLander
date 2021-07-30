@@ -11,18 +11,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
 
 import datetime
-e_start = datetime.datetime.now()
-e_end = datetime.datetime.now()
-print(e_start - e_end)
 
-mx_now = datetime.datetime.now()
-
-def tic(step):
-    global mx_now
-    now = datetime.datetime.now()
-    print("time (",step,"): ", now - mx_now)
-
-    mx_now = now
 
 class DQN:
     def __init__(self):
@@ -35,7 +24,7 @@ class DQN:
 
         self.state_space = 8
         self.action_space = 4
-        self.batch_size = 64
+        self.batch_size = 128
 
         self.main_network = self.build_network()
         self.target_network = self.build_network()
@@ -58,8 +47,8 @@ class DQN:
 
     def build_network(self):
         model = Sequential()
-        model.add(Dense(256, input_dim=self.state_space, activation='relu'))
-        model.add(Dense(256, activation='relu'))
+        model.add(Dense(128, input_dim=self.state_space, activation='relu'))
+        model.add(Dense(128, activation='relu'))
         model.add(Dense(self.action_space, activation='linear'))
         model.compile(loss='mse', optimizer=Adam())
         return model
@@ -132,70 +121,6 @@ class DQN:
         path = filename + '.' + str(episode)
         self.target_network.save(path, overwrite=True)
 
-def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
-    state = env.reset()
-    success_list = np.zeros(100)
-    total_reward_list = np.zeros(100)
-
-    for episode in range(num_epsiodes):
-        state = env.reset()
-        a = lunar_dqn.get_action(state)
-        total_reward = 0
-        reward = 0
-        e_start = datetime.datetime.now()
-
-        step_count = 0
-
-        for steps in range(500):
-            s_start = datetime.datetime.now()
-
-            new_state, reward, done, info = env.step(a)
-
-            if steps == 499:
-                done = True
-
-            lunar_dqn.add_sars(state, a, reward, new_state, done)
-            total_reward += reward
-            lunar_dqn.train()
-
-            step_count += 1
-            if (step_count % 100) == 0:
-                lunar_dqn.update_target_network()
-
-            if do_render:
-                env.render()
-
-            if done:
-                if reward == 100:
-                    success_list[episode % 100] = 1
-                    if do_render:
-                        print("SUCCESS (",episode,")", total_reward)
-                else:
-                    success_list[episode % 100] = 0
-                    if do_render:
-                        print("FAILURE (",episode,")", total_reward)
-                total_reward_list[episode % 100] = total_reward
-                break
-
-            state = new_state
-            a = lunar_dqn.get_action(new_state)
-            s_end = datetime.datetime.now()
-            # print("Step",episode, "/", steps ,"# took time:", s_end - s_start)
-
-        e_end = datetime.datetime.now()
-
-        lunar_dqn.reduce_epsilon()
-        lunar_dqn.save(model_path, episode)
-
-        if (episode % 1 == 0):
-            ave = np.minimum(episode + 1, 100)
-            print("Success Rate(",episode,"):", np.sum(success_list) / ave * 100, "%")
-            print("Epsilon:", lunar_dqn.epsilon)
-            print("Last TR:", total_reward)
-            print("average TR:", np.sum(total_reward_list) / ave)
-            print("# took time:", e_end - e_start)
-    return lunar_dqn
-
 def fly(env, lunar_dqn, num_epsiodes, record):
     success = 0
     total_reward_list = np.zeros(num_epsiodes)
@@ -210,7 +135,7 @@ def fly(env, lunar_dqn, num_epsiodes, record):
         unknown = 0
         total_reward = 0
 
-        for steps in range(500):
+        for steps in range(50000):
 
             new_state, reward, done, info = env.step(a)
 
@@ -234,21 +159,12 @@ def fly(env, lunar_dqn, num_epsiodes, record):
 
 env = gym.make("LunarLander-v2")
 
-num_epsiodes = 200
 visible_episodes = 50
 record = False
 
-dotrain = True
-show_training = False
+p_file = 'C:/Users/Public/Documents/dev/lunar/128_128_g099_e1/model_large'
 
-p_file = 'C:/Users/Public/Documents/dev/lunar/256_256_g099_e1_b64/model_large'
+lunar_dqn = DQN()
+lunar_dqn.load(p_file, 100)
 
-if dotrain:
-    lunar_dqn = DQN()
-    # lunar_dqn.load(p_file)
-    lunar_dqn = train(env, lunar_dqn, num_epsiodes, p_file, show_training)
-    # lunar_dqn.save(p_file)
-else:
-    lunar_dqn = DQN()
-    lunar_dqn.load(p_file, 100)
-    fly(env, lunar_dqn, visible_episodes, record)
+fly(env, lunar_dqn, visible_episodes, record)
