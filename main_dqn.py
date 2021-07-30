@@ -25,17 +25,19 @@ def tic(step):
     mx_now = now
 
 class DQN:
-    def __init__(self):
+    def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
         # tuning params
-        self.gamma = 0.9
-
-        self.epsilon = 1
-        self.epsilon_decay = 0.996
-        self.epsilon_min = 0.01
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.epsilon_decay = epsilon_decay
+        self.epsilon_min = epsilon_min
+        self.first = first
+        self.second = second
+        self.batch_size = batch_size
 
         self.state_space = 8
         self.action_space = 4
-        self.batch_size = 64
+
 
         self.main_network = self.build_network()
         self.target_network = self.build_network()
@@ -58,8 +60,8 @@ class DQN:
 
     def build_network(self):
         model = Sequential()
-        model.add(Dense(256, input_dim=self.state_space, activation='relu'))
-        model.add(Dense(256, activation='relu'))
+        model.add(Dense(self.first, input_dim=self.state_space, activation='relu'))
+        model.add(Dense(self.second, activation='relu'))
         model.add(Dense(self.action_space, activation='linear'))
         model.compile(loss='mse', optimizer=Adam())
         return model
@@ -241,14 +243,26 @@ record = False
 dotrain = True
 show_training = False
 
-p_file = 'C:/Users/Public/Documents/dev/lunar/256_256_g099_e1_b64/model_large'
+#     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
+
+# Hyperparameters
+gamma = 0.99
+epsilon = 1
+epsilon_decay = 0.996
+epsilon_min = 0.01
+first = 256
+second = 256
+batch_size = 64
+
+path_pattern = 'C:/Users/Public/Documents/dev/lunar/{}_{}_g{}_e{}_ed{}_b{}/model'
+path = path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size)
 
 if dotrain:
-    lunar_dqn = DQN()
+    lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, first=first, second=second, batch_size=batch_size)
     # lunar_dqn.load(p_file)
-    lunar_dqn = train(env, lunar_dqn, num_epsiodes, p_file, show_training)
+    lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:
     lunar_dqn = DQN()
-    lunar_dqn.load(p_file, 100)
+    lunar_dqn.load(path, 100)
     fly(env, lunar_dqn, visible_episodes, record)
