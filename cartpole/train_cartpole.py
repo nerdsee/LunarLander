@@ -8,21 +8,8 @@ import datetime
 
 from dqn import DQN
 
-e_start = datetime.datetime.now()
-e_end = datetime.datetime.now()
-print(e_start - e_end)
 
-mx_now = datetime.datetime.now()
-
-def tic(step):
-    global mx_now
-    now = datetime.datetime.now()
-    print("time (",step,"): ", now - mx_now)
-
-    mx_now = now
-
-
-def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
+def train(env, lunar_dqn, num_epsiodes, model_path, do_render=False):
     state = env.reset()
     success_list = np.zeros(100)
     total_reward_list = np.zeros(100)
@@ -49,20 +36,20 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
             lunar_dqn.train()
 
             step_count += 1
-            if (step_count % 100) == 0:
+            if (step_count % 10) == 0:
                 lunar_dqn.update_target_network()
 
             if do_render:
                 env.render()
 
             if done:
-                if reward == 100:
+                if steps == 200:
                     success_list[episode % 100] = 1
-                    print("SUCCESS (",episode,")", total_reward)
+                    print("SUCCESS (", episode, ")", total_reward)
                 else:
                     success_list[episode % 100] = 0
                     if do_render:
-                        print("FAILURE (",episode,")", total_reward)
+                        print("FAILURE (", episode, ")", total_reward)
                 total_reward_list[episode % 100] = total_reward
                 break
 
@@ -78,12 +65,14 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
 
         if (episode % 1 == 0):
             ave = np.minimum(episode + 1, 100)
-            print("Success Rate(",episode,"):", np.sum(success_list) / ave * 100, "%")
-            print("Epsilon:", lunar_dqn.epsilon)
-            print("Last TR:", total_reward)
-            print("average TR:", np.sum(total_reward_list) / ave)
+            print("Success Rate(", episode, "):", np.sum(success_list) / ave * 100, "%", end=" - ")
+            print("Epsilon:", np.round(lunar_dqn.epsilon, decimals=2), end=" - ")
+            print("Last TR:", total_reward, end=" - ")
+            print("Steps:", steps, end=" - ")
+            print("average TR:", np.round(np.sum(total_reward_list) / ave, decimals=3), end=" - ")
             print("# took time:", e_end - e_start)
     return lunar_dqn
+
 
 def fly(env, lunar_dqn, num_epsiodes, record):
     success = 0
@@ -106,7 +95,7 @@ def fly(env, lunar_dqn, num_epsiodes, record):
             env.render()
             total_reward += reward
             if done:
-                if reward == 100:
+                if steps == 200:
                     success += 1
                 print("R:", reward, "TR:", total_reward, "U:", unknown)
                 break
@@ -118,41 +107,45 @@ def fly(env, lunar_dqn, num_epsiodes, record):
     print("Landings: ", success, "/", num_epsiodes)
     print("Average TR: ", np.average(list(total_reward_list)))
 
+
 #######################################
 ## CODE
 
-env = gym.make("LunarLander-v2")
+env = gym.make("CartPole-v1")
 
-num_epsiodes = 5000
+num_epsiodes = 500
 visible_episodes = 50
 record = False
 
-dotrain = True
+dotrain = False
 show_training = False
 
 #     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
 
 # Hyperparameters
 gamma = 0.99
-epsilon = 1
-epsilon_decay = 0.998
+epsilon = 0.5
+epsilon_decay = 0.99
 epsilon_min = 0.01
-first = 160
-second = 140
+first = 128
+second = 128
 batch_size = 64
 
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
-path_root = 'C:/Users/U429079/models/'
+path_root = 'C:/Users/U429079/models/cart/'
 
-path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf10000/model'
+path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf2000/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size)
 
+lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min,
+                batch_size=batch_size, replay_buffer=2000)
+
+lunar_dqn.set_topology(first=first, second=second, action_space=2, state_space=4 )
+
 if dotrain:
-    lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, first=first, second=second, batch_size=batch_size)
     # lunar_dqn.load(p_file)
     lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:
-    lunar_dqn = DQN()
-    lunar_dqn.load(path, 995)
+    lunar_dqn.load(path, 211)
     fly(env, lunar_dqn, visible_episodes, record)
