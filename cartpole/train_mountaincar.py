@@ -112,7 +112,7 @@ num_epsiodes = 5000
 visible_episodes = 50
 record = False
 
-dotrain = True
+dotrain = False
 show_training = False
 
 #     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
@@ -127,8 +127,8 @@ second = 128
 batch_size = 64
 buf = 2000
 
-# path_root = 'C:/Users/Public/Documents/dev/lunar/'
-path_root = 'C:/Users/U429079/models/mountaincar/'
+path_root = 'C:/Users/JAN/Documents/ri/mountaincar/'
+# path_root = 'C:/Users/U429079/models/mountaincar/'
 
 path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
@@ -142,5 +142,5 @@ if dotrain:
     lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:
-    lunar_dqn.load(path, 211)
+    lunar_dqn.load(path, 70)
     fly(env, lunar_dqn, visible_episodes, record)
