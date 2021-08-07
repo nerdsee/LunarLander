@@ -110,17 +110,18 @@ env._max_episode_steps = 1000
 
 num_epsiodes = 5000
 visible_episodes = 50
-record = False
+record = True
 
-dotrain = True
+dotrain = False
+
 show_training = False
 
 #     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
 
 # Hyperparameters
 gamma = 0.99
-epsilon = 1
-epsilon_decay = 0.996
+epsilon = 0.3
+epsilon_decay = 0.99
 epsilon_min = 0.01
 first = 128
 second = 128
@@ -128,7 +129,7 @@ batch_size = 64
 buf = 2000
 
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
-path_root = 'C:/Users/U429079/models/mountaincar/'
+path_root = 'models/'
 
 path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
@@ -138,9 +139,10 @@ lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsil
 lunar_dqn.set_topology(state_space = 2, first=first, second=second, action_space = 3)
 
 if dotrain:
-    # lunar_dqn.load(p_file)
+    lunar_dqn.load('models/128_128_g0.99_e1_ed0.996_b64.buf2000/model.103')
     lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:
-    lunar_dqn.load(path, 211)
+    # 105 / 103
+    lunar_dqn.load(path, 143)
     fly(env, lunar_dqn, visible_episodes, record)

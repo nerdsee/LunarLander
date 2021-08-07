@@ -109,7 +109,8 @@ class DQN:
         # history.history
 
     def load(self, filename, episode=-1):
-        path = filename + '.' + str(episode)
+
+        path = filename +  ( ( '.' + str(episode) ) if episode >= 0 else '' )
         self.main_network = tensorflow.keras.models.load_model(path)
         self.target_network = self.build_network()
         # self.update_target_network()
