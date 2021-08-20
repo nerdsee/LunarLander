@@ -130,12 +130,13 @@ epsilon_min = 0.01
 first = 128
 second = 128
 batch_size = 64
+buf = 5000
 
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
 path_root = 'C:/Users/U429079/models/cart/'
 
-path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf2000/model'
-path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size)
+path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}/model'
+path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
 
 lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min,
                 batch_size=batch_size, replay_buffer=2000)

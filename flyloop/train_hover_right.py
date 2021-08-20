@@ -21,6 +21,27 @@ def tic(step):
 
     mx_now = now
 
+def get_reward(state, prev_shaping):
+    reward = 0
+
+    diff_x = 0.5
+    diff_y = 0.5
+
+    x = state[0] - diff_x
+    y = state[1] - diff_y
+
+    shaping = \
+        - 100 * np.sqrt(x * x + y * y) \
+        - 100 * np.sqrt(state[2] * state[2] + state[3] * state[3]) \
+        - 100 * abs(state[4])   # And ten points for legs contact, the idea is if you
+    # lose contact again after landing, you get negative reward
+    if prev_shaping is not None:
+        reward = shaping - prev_shaping
+
+    # reward -= m_power * 0.30  # less fuel spent is better, about -30 for heuristic landing
+    # reward -= s_power * 0.03
+
+    return reward, shaping
 
 def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
     state = env.reset()
@@ -35,11 +56,14 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
         e_start = datetime.datetime.now()
 
         step_count = 0
+        prev_shaping = 0
 
         for steps in range(1500):
             s_start = datetime.datetime.now()
 
-            new_state, reward, done, info = env.step(a)
+            new_state, real_reward, done, info = env.step(a)
+
+            reward, prev_shaping = get_reward(state, prev_shaping)
 
             if steps == 1499:
                 done = True
@@ -128,14 +152,14 @@ num_epsiodes = 5000
 visible_episodes = 50
 record = False
 
-dotrain = False
+dotrain = True
 show_training = False
 
 #     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
 
 # Hyperparameters
 gamma = 0.99
-epsilon = 0.3
+epsilon = 1
 epsilon_decay = 0.998
 epsilon_min = 0.01
 first = 150
@@ -146,14 +170,14 @@ buf = 10000
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
 path_root = 'models/'
 
-path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}.improve/model'
+path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}.hover_right/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
 
 lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batch_size=batch_size, replay_buffer=buf)
 lunar_dqn.set_topology(state_space = 8, first=first, second=second, action_space = 4)
 
 if dotrain:
-    lunar_dqn.load('C:/Users/JAN/Documents/ri/lunar/models/150_120_g0.99_e1_ed0.996_lr0.001_b64_buf5000/model', 580)
+    # lunar_dqn.load('C:/Users/JAN/Documents/ri/lunar/models/150_120_g0.99_e1_ed0.996_lr0.001_b64_buf5000/model', 580)
     lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:
