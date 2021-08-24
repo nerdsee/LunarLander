@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 from os import listdir
 from os.path import isfile, join
@@ -159,19 +160,28 @@ def save_image_matrix(matrix, path):
     return path
 
 
-def generate_model(image_path, dir, tag, topology, steps=1500, learning_rate=0.0001, scale=1):
+def generate_model(image_path, output_dir=None, tag=None, topology=None, steps=1500, learning_rate=0.0001, scale=1):
+
+    if tag is None:
+        tag = str(round(time.time()))
+
+    if topology is None:
+        raise Exception("No Topology specified.")
+
+    if output_dir is None:
+        output_dir = tag + '/'
 
     image = imageio.imread(image_path)
-
-    save_image_matrix(image, 'images/temp.png')
 
     width = image.shape[1]
     height = image.shape[0]
 
+    print("Setup neural network")
     model = Image_Net(width, height)
     model.set_topology(dimensions=2, topology=topology, color_channels=3, learning_rate=learning_rate)
 
 
+    print("prepare training data")
     for xt in range(width):
         for yt in range(height):
             if image.shape[2] == 3:
@@ -189,12 +199,13 @@ def generate_model(image_path, dir, tag, topology, steps=1500, learning_rate=0.0
         model_path += "-"
     model_path += str(learning_rate)
 
-    path_root = dir + model_path + '/'
+    path_root = output_dir + model_path + '/'
 
     if not os.path.exists(path_root):
         os.makedirs(path_root)
         print("Directory ", path_root, " Created ")
 
+    print("start training")
     frames = []
     pad = "0000"
     for i in range(1500):
@@ -300,8 +311,8 @@ def main():
     imagepath = 'images/AVIATAR_LOGO.jpg'
     tag = "aviatar"
 
-    topology = (128, 128)
-    generate_model(imagepath, 'images/', tag, topology, scale=1, steps=1500, learning_rate=0.0001)
+    topology = (32, 32)
+    generate_model(imagepath, output_dir='images/', tag=tag, topology=topology, scale=1, steps=150, learning_rate=0.0001)
     # generate_animation_from_folder('images/32-32-/')
 
 if __name__ == "__main__":
