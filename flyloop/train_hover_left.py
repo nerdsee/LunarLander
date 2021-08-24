@@ -68,7 +68,7 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
             if steps == 1499:
                 done = True
 
-            lunar_dqn.add_sars(state, a, reward, new_state, done)
+            lunar_dqn.add_training(state, a, reward, new_state, done)
             total_reward += reward
             lunar_dqn.train()
 
@@ -170,7 +170,7 @@ buf = 10000
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
 path_root = 'models/'
 
-path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}.hover_left/model'
+path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}.hover_left_test/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
 
 lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsilon_min=epsilon_min, batch_size=batch_size, replay_buffer=buf)

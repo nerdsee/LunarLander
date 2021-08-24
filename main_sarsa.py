@@ -10,7 +10,7 @@ def train(env, num_epsiodes, do_render = False):
     success_list = np.zeros(100)
     total_reward_list = np.zeros(100)
 
-    print("Action:", env.action_space)
+    print("Action:", env.color_channels)
     print("Observation:", env.observation_space)
 
     sarsa_vlc = Sarsa()

@@ -27,7 +27,7 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
 
             new_state, reward, done, info = env.step(a)
 
-            lunar_dqn.add_sars(state, a, reward, new_state, done)
+            lunar_dqn.add_training(state, a, reward, new_state, done)
             total_reward += reward
             lunar_dqn.train()
 

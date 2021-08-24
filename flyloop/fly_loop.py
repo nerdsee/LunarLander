@@ -45,7 +45,7 @@ def train(env, initial_state, lunar_dqn, num_episodes, model_path, do_render = F
             if steps == 1499:
                 done = True
 
-            lunar_dqn.add_sars(state, a, reward, new_state, done)
+            lunar_dqn.add_training(state, a, reward, new_state, done)
             total_reward += reward
             lunar_dqn.train()
 

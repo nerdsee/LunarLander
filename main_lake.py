@@ -14,7 +14,7 @@ def e_g(Q, state, epsilon):
         return np.random.randint(4)
         # return env.action_space.sample()
     else:
-        a = max(list(range(env.action_space.n)), key = lambda x: Q[(state, x)])
+        a = max(list(range(env.color_channels.n)), key = lambda x: Q[(state, x)])
         return a
 
 def train(env, Q, num_epsiodes, do_render = False):
@@ -23,7 +23,7 @@ def train(env, Q, num_epsiodes, do_render = False):
     total_reward_list = np.zeros(100)
     max_success = 0
 
-    print("Action:", env.action_space)
+    print("Action:", env.color_channels)
     print("Observation:", env.observation_space)
 
     sarsa_vlc = Sarsa()
@@ -104,7 +104,7 @@ def train(env, Q, num_epsiodes, do_render = False):
 def calc_policy(Q):
     policy = np.zeros(env.observation_space.n, numpy.int8)
     for s in range(env.observation_space.n):
-        options = [Q[(s, a)] for a in range(env.action_space.n)]
+        options = [Q[(s, a)] for a in range(env.color_channels.n)]
         policy[s] = np.argmax(options)
     return policy
 
@@ -183,7 +183,7 @@ p_file = 'C:/Users/Public/Documents/dev/lunar/policy_lake.json'
 
 local_Q = {}
 for s in range(env.observation_space.n):
-    for a in range(env.action_space.n):
+    for a in range(env.color_channels.n):
         local_Q[(s, a)] = 0
 
 if dotrain:
