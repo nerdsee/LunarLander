@@ -28,7 +28,7 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
     total_reward_list = np.zeros(100)
 
     for episode in range(num_epsiodes):
-        state = env.reset()
+        state = env.reset()[0]
         a = lunar_dqn.get_action(state)
         total_reward = 0
         reward = 0
@@ -39,12 +39,12 @@ def train(env, lunar_dqn, num_epsiodes, model_path, do_render = False):
         for steps in range(1500):
             s_start = datetime.datetime.now()
 
-            new_state, reward, done, info = env.step(a)
+            new_state, reward, done, info, something = env.step(a)
 
             if steps == 1499:
                 done = True
 
-            lunar_dqn.add_training(state, a, reward, new_state, done)
+            lunar_dqn.add_sars(state, a, reward, new_state, done)
             total_reward += reward
             lunar_dqn.train()
 
@@ -128,8 +128,8 @@ num_epsiodes = 5000
 visible_episodes = 50
 record = False
 
-dotrain = False
-show_training = False
+dotrain = True
+show_training = True
 
 #     def __init__(self, gamma = 0.99, epsilon = 1, epsilon_decay = 0.9, epsilon_min=0.01, first=256, second=256, batch_size=64):
 
@@ -144,7 +144,7 @@ batch_size = 64
 buf = 10000
 
 # path_root = 'C:/Users/Public/Documents/dev/lunar/'
-path_root = 'models/'
+path_root = '../models/'
 
 path_pattern = '{}_{}_g{}_e{}_ed{}_b{}.buf{}.improve/model'
 path = path_root + path_pattern.format(first, second, gamma, epsilon, epsilon_decay, batch_size, buf)
@@ -153,7 +153,7 @@ lunar_dqn = DQN(gamma=gamma, epsilon=epsilon, epsilon_decay=epsilon_decay, epsil
 lunar_dqn.set_topology(state_space = 8, first=first, second=second, action_space = 4)
 
 if dotrain:
-    lunar_dqn.load('C:/Users/JAN/Documents/ri/lunar/models/150_120_g0.99_e1_ed0.996_lr0.001_b64_buf5000/model', 580)
+    # lunar_dqn.load('C:/Users/JAN/Documents/ri/lunar/models/150_120_g0.99_e1_ed0.996_lr0.001_b64_buf5000/model', 580)
     lunar_dqn = train(env, lunar_dqn, num_epsiodes, path, show_training)
     # lunar_dqn.save(p_file)
 else:

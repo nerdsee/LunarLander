@@ -44,11 +44,12 @@ env = gym.make("LunarLander-v2")
 visible_episodes = 50
 record = False
 
-p_file = 'C:/Users/U429079/models/160_140_g0.99_e1_ed0.998_b64.buf10000/model'
+p_file = 'C:/Users/U429079/PycharmProjects/LunarLander/models/150_120_g0.99_e0.3_ed0.998_b64.buf10000.improve/model'
 
 # 160_140_g0.99_e1_ed0.998_b64.buf10000 # 1866 # 71%
 
 lunar_dqn = DQN()
+lunar_dqn.set_topology(state_space = 8, first=150, second=120, action_space = 4)
 lunar_dqn.load(p_file, 1600)
 
 fly(env, lunar_dqn, visible_episodes, record)
